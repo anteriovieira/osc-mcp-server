@@ -1,4 +1,6 @@
-# OSC MCP Server - Agent Configuration Guide
+# X32 OSC MCP Server - Agent Configuration Guide
+
+This guide explains how to configure and use the X32 OSC MCP server (for Behringer X32 digital mixer) with different AI agents and platforms.
 
 This guide explains how to configure and use the OSC MCP server with different AI agents and platforms.
 
@@ -235,10 +237,10 @@ Once configured in your agent:
 
 **Solutions**:
 - Verify `OSC_HOST` is correct (ping the IP address)
-- Check `OSC_PORT` matches your mixer's OSC port (default: 10023)
-- Ensure OSC is enabled on the mixer
+- Check `OSC_PORT` matches your X32's OSC port (default: 10023)
+- Ensure OSC is enabled on the X32 mixer (Setup → Network → OSC)
 - Check firewall settings allow UDP traffic on port 10023
-- Verify network connectivity: `ping YOUR_MIXER_IP`
+- Verify network connectivity: `ping YOUR_X32_IP`
 
 ### Tools Not Appearing
 
@@ -255,8 +257,8 @@ Once configured in your agent:
 **Problem**: Tools appear but commands don't execute.
 
 **Solutions**:
-- Check the mixer is powered on and connected to the network
-- Verify OSC is enabled in mixer settings (Setup → Network → OSC)
+- Check the X32 mixer is powered on and connected to the network
+- Verify OSC is enabled in X32 mixer settings (Setup → Network → OSC)
 - Check agent logs for error messages
 - Try a simple command first (like getting fader level)
 

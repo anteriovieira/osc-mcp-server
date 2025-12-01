@@ -1,8 +1,8 @@
-# OSC MCP Server - Installation Summary
+# X32 OSC MCP Server - Installation Summary
 
 ## ✅ What's Been Created
 
-A complete MCP (Model Context Protocol) server for controlling the Behringer X32 digital mixer through Claude Desktop using natural language commands.
+A complete MCP (Model Context Protocol) server for controlling the Behringer X32 digital mixer via OSC (Open Sound Control). Control your X32 mixer through natural language commands in Claude Desktop and other MCP-compatible AI assistants.
 
 ## 📁 Project Structure
 
@@ -138,11 +138,11 @@ Once configured, you can use natural language commands like:
 - Automatic connection keep-alive (/xremote every 9 seconds)
 
 ### Supported Mixer Models:
+This MCP server is specifically designed for the Behringer X32 console:
 - Behringer X32
 - Behringer X32 Compact
 - Behringer X32 Producer
 - Behringer X32 Rack
-- Midas M32 (compatible)
 
 ## 📚 Documentation Files
 

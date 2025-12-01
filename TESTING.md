@@ -1,17 +1,24 @@
-# Testing Guide
+# Testing Guide - X32 OSC MCP Server
 
-This guide explains how to test the OSC MCP server using an external emulator (e.g., X32-Edit).
+This guide explains how to test the X32 OSC MCP server using an X32 emulator or the physical Behringer X32 mixer.
 
 ## Overview
 
-Since we are using an external application to emulate the X32 mixer, you will need to:
+You can test the MCP server with either:
 
-1.  **Install and Run the Emulator**: Download and install the X32-Edit application (or similar emulator) from the Behringer website.
+1. **Physical Behringer X32 Mixer**: Connect your computer to the X32 on the same network
+2. **X32 Emulator**: Use an emulator application to simulate the X32 mixer
+
+### Using the X32 Emulator
+
+If you don't have access to a physical X32 mixer, you can use an emulator:
+
+1.  **Install and Run the Emulator**: Download and run the X32 emulator (available in the `emulator/` directory)
 2.  **Configure the Emulator**:
-    *   Ensure the emulator is running and listening for OSC commands.
-    *   Note the IP address and Port the emulator is using (usually UDP port 10023).
+    *   Ensure the emulator is running and listening for OSC commands
+    *   Note the IP address and Port the emulator is using (usually UDP port 10023)
 3.  **Configure the MCP Server**:
-    *   Update your `claude_desktop_config.json` to point to the emulator's IP and Port.
+    *   Update your `claude_desktop_config.json` to point to the emulator's IP and Port
 
 ## Configuration
 
@@ -46,7 +53,7 @@ You can run the connection test script to verify connectivity to the emulator:
 npm test
 ```
 
-This will attempt to connect to the X32 mixer (or emulator) at the configured address and perform basic operations.
+This will attempt to connect to the Behringer X32 mixer (or emulator) at the configured address and perform basic operations.
 
 ## Manual Testing
 

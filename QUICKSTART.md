@@ -1,4 +1,6 @@
-# Quick Start Guide - OSC MCP Server for Claude Desktop
+# Quick Start Guide - X32 OSC MCP Server
+
+A quick guide to get started controlling your Behringer X32 digital mixer via OSC through Claude Desktop and other MCP-compatible AI assistants.
 
 ## Installation Steps
 

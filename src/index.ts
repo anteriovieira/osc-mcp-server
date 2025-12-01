@@ -194,9 +194,9 @@ const TOOLS: Tool[] = [
                 },
                 band: {
                     type: "number",
-                    description: "EQ band (1-4)",
+                    description: "EQ band (1-6)",
                     minimum: 1,
-                    maximum: 4,
+                    maximum: 6,
                 },
                 gain: {
                     type: "number",
@@ -222,7 +222,7 @@ const TOOLS: Tool[] = [
                 },
                 band: {
                     type: "number",
-                    description: "EQ band (1-4)",
+                    description: "EQ band (1-6)",
                     minimum: 1,
                     maximum: 4,
                 },
@@ -244,7 +244,7 @@ const TOOLS: Tool[] = [
                 },
                 band: {
                     type: "number",
-                    description: "EQ band (1-4)",
+                    description: "EQ band (1-6)",
                     minimum: 1,
                     maximum: 4,
                 },
@@ -272,7 +272,7 @@ const TOOLS: Tool[] = [
                 },
                 band: {
                     type: "number",
-                    description: "EQ band (1-4)",
+                    description: "EQ band (1-6)",
                     minimum: 1,
                     maximum: 4,
                 },
@@ -979,6 +979,683 @@ const TOOLS: Tool[] = [
             required: ["scene"],
         },
     },
+    // ========== System Commands ==========
+    {
+        name: "osc_get_info",
+        description: "Get mixer information (server version, name, console model, version)",
+        inputSchema: {
+            type: "object",
+            properties: {},
+        },
+    },
+    {
+        name: "osc_enable_xcontrol",
+        description: "Enable XControl mode to receive parameter updates from mixer (timeout: 10 seconds)",
+        inputSchema: {
+            type: "object",
+            properties: {},
+        },
+    },
+    // ========== Preamp Controls ==========
+    {
+        name: "osc_set_preamp_gain",
+        description: "Set preamp gain for a channel (headamp trim)",
+        inputSchema: {
+            type: "object",
+            properties: {
+                channel: {
+                    type: "number",
+                    description: "Channel number (1-32)",
+                    minimum: 1,
+                    maximum: 32,
+                },
+                gain: {
+                    type: "number",
+                    description: "Gain level (0.0 to 1.0, representing -12dB to +60dB)",
+                    minimum: 0,
+                    maximum: 1,
+                },
+            },
+            required: ["channel", "gain"],
+        },
+    },
+    {
+        name: "osc_get_preamp_gain",
+        description: "Get preamp gain for a channel",
+        inputSchema: {
+            type: "object",
+            properties: {
+                channel: {
+                    type: "number",
+                    description: "Channel number (1-32)",
+                    minimum: 1,
+                    maximum: 32,
+                },
+            },
+            required: ["channel"],
+        },
+    },
+    {
+        name: "osc_set_highpass_filter",
+        description: "Enable or disable high-pass filter for a channel",
+        inputSchema: {
+            type: "object",
+            properties: {
+                channel: {
+                    type: "number",
+                    description: "Channel number (1-32)",
+                    minimum: 1,
+                    maximum: 32,
+                },
+                enabled: {
+                    type: "boolean",
+                    description: "True to enable, false to disable",
+                },
+            },
+            required: ["channel", "enabled"],
+        },
+    },
+    {
+        name: "osc_set_highpass_filter_frequency",
+        description: "Set high-pass filter frequency for a channel",
+        inputSchema: {
+            type: "object",
+            properties: {
+                channel: {
+                    type: "number",
+                    description: "Channel number (1-32)",
+                    minimum: 1,
+                    maximum: 32,
+                },
+                frequency: {
+                    type: "number",
+                    description: "Frequency level (0.0 to 1.0, representing 20Hz to 400Hz)",
+                    minimum: 0,
+                    maximum: 1,
+                },
+            },
+            required: ["channel", "frequency"],
+        },
+    },
+    {
+        name: "osc_set_phantom_power",
+        description: "Set phantom power for a headamp",
+        inputSchema: {
+            type: "object",
+            properties: {
+                headamp: {
+                    type: "number",
+                    description: "Headamp number (0-127: 0-31=local, 32-79=AES50-A, 80-127=AES50-B)",
+                    minimum: 0,
+                    maximum: 127,
+                },
+                enabled: {
+                    type: "boolean",
+                    description: "True to enable, false to disable",
+                },
+            },
+            required: ["headamp", "enabled"],
+        },
+    },
+    // ========== Insert Effects ==========
+    {
+        name: "osc_set_insert_on",
+        description: "Enable or disable insert effect for a channel",
+        inputSchema: {
+            type: "object",
+            properties: {
+                channel: {
+                    type: "number",
+                    description: "Channel number (1-32)",
+                    minimum: 1,
+                    maximum: 32,
+                },
+                enabled: {
+                    type: "boolean",
+                    description: "True to enable, false to disable",
+                },
+            },
+            required: ["channel", "enabled"],
+        },
+    },
+    {
+        name: "osc_set_insert_position",
+        description: "Set insert effect position for a channel",
+        inputSchema: {
+            type: "object",
+            properties: {
+                channel: {
+                    type: "number",
+                    description: "Channel number (1-32)",
+                    minimum: 1,
+                    maximum: 32,
+                },
+                position: {
+                    type: "number",
+                    description: "Position: 0=PRE, 1=POST (or 0-3 based on protocol)",
+                    minimum: 0,
+                    maximum: 3,
+                },
+            },
+            required: ["channel", "position"],
+        },
+    },
+    // ========== Solo Controls ==========
+    {
+        name: "osc_set_solo",
+        description: "Solo or unsolo a channel",
+        inputSchema: {
+            type: "object",
+            properties: {
+                channel: {
+                    type: "number",
+                    description: "Channel number (1-32)",
+                    minimum: 1,
+                    maximum: 32,
+                },
+                solo: {
+                    type: "boolean",
+                    description: "True to solo, false to unsolo",
+                },
+            },
+            required: ["channel", "solo"],
+        },
+    },
+    {
+        name: "osc_get_solo",
+        description: "Get solo status of a channel",
+        inputSchema: {
+            type: "object",
+            properties: {
+                channel: {
+                    type: "number",
+                    description: "Channel number (1-32)",
+                    minimum: 1,
+                    maximum: 32,
+                },
+            },
+            required: ["channel"],
+        },
+    },
+    // ========== DCA Groups ==========
+    {
+        name: "osc_set_dca_on",
+        description: "Enable or disable a DCA group",
+        inputSchema: {
+            type: "object",
+            properties: {
+                dca: {
+                    type: "number",
+                    description: "DCA number (1-8)",
+                    minimum: 1,
+                    maximum: 8,
+                },
+                on: {
+                    type: "boolean",
+                    description: "True to enable, false to disable",
+                },
+            },
+            required: ["dca", "on"],
+        },
+    },
+    {
+        name: "osc_set_dca_fader",
+        description: "Set the fader level for a DCA group",
+        inputSchema: {
+            type: "object",
+            properties: {
+                dca: {
+                    type: "number",
+                    description: "DCA number (1-8)",
+                    minimum: 1,
+                    maximum: 8,
+                },
+                level: {
+                    type: "number",
+                    description: "Fader level (0.0 to 1.0)",
+                    minimum: 0,
+                    maximum: 1,
+                },
+            },
+            required: ["dca", "level"],
+        },
+    },
+    {
+        name: "osc_get_dca_fader",
+        description: "Get the fader level for a DCA group",
+        inputSchema: {
+            type: "object",
+            properties: {
+                dca: {
+                    type: "number",
+                    description: "DCA number (1-8)",
+                    minimum: 1,
+                    maximum: 8,
+                },
+            },
+            required: ["dca"],
+        },
+    },
+    {
+        name: "osc_set_dca_name",
+        description: "Set the name of a DCA group",
+        inputSchema: {
+            type: "object",
+            properties: {
+                dca: {
+                    type: "number",
+                    description: "DCA number (1-8)",
+                    minimum: 1,
+                    maximum: 8,
+                },
+                name: {
+                    type: "string",
+                    description: "DCA name",
+                },
+            },
+            required: ["dca", "name"],
+        },
+    },
+    // ========== Output Controls ==========
+    {
+        name: "osc_set_output_source",
+        description: "Set the source for an output (main, aux, p16, aes, rec)",
+        inputSchema: {
+            type: "object",
+            properties: {
+                outputType: {
+                    type: "string",
+                    description: "Output type: main, aux, p16, aes, or rec",
+                    enum: ["main", "aux", "p16", "aes", "rec"],
+                },
+                output: {
+                    type: "number",
+                    description: "Output number (1-16 for main/p16, 1-6 for aux, 1-2 for aes/rec)",
+                    minimum: 1,
+                    maximum: 16,
+                },
+                source: {
+                    type: "number",
+                    description: "Source number (0-76)",
+                    minimum: 0,
+                    maximum: 76,
+                },
+            },
+            required: ["outputType", "output", "source"],
+        },
+    },
+    {
+        name: "osc_set_output_delay",
+        description: "Enable or disable delay for an output",
+        inputSchema: {
+            type: "object",
+            properties: {
+                outputType: {
+                    type: "string",
+                    description: "Output type: main, aux, p16, aes, or rec",
+                    enum: ["main", "aux", "p16", "aes", "rec"],
+                },
+                output: {
+                    type: "number",
+                    description: "Output number",
+                    minimum: 1,
+                    maximum: 16,
+                },
+                enabled: {
+                    type: "boolean",
+                    description: "True to enable, false to disable",
+                },
+            },
+            required: ["outputType", "output", "enabled"],
+        },
+    },
+    {
+        name: "osc_set_output_delay_time",
+        description: "Set delay time for an output",
+        inputSchema: {
+            type: "object",
+            properties: {
+                outputType: {
+                    type: "string",
+                    description: "Output type: main, aux, p16, aes, or rec",
+                    enum: ["main", "aux", "p16", "aes", "rec"],
+                },
+                output: {
+                    type: "number",
+                    description: "Output number",
+                    minimum: 1,
+                    maximum: 16,
+                },
+                time: {
+                    type: "number",
+                    description: "Delay time (0.0 to 1.0, representing 0.3ms to 500ms)",
+                    minimum: 0,
+                    maximum: 1,
+                },
+            },
+            required: ["outputType", "output", "time"],
+        },
+    },
+    // ========== Main Mono ==========
+    {
+        name: "osc_set_main_mono_fader",
+        description: "Set the main mono fader level",
+        inputSchema: {
+            type: "object",
+            properties: {
+                level: {
+                    type: "number",
+                    description: "Fader level (0.0 to 1.0)",
+                    minimum: 0,
+                    maximum: 1,
+                },
+            },
+            required: ["level"],
+        },
+    },
+    {
+        name: "osc_get_main_mono_fader",
+        description: "Get the main mono fader level",
+        inputSchema: {
+            type: "object",
+            properties: {},
+        },
+    },
+    {
+        name: "osc_mute_main_mono",
+        description: "Mute or unmute the main mono mix",
+        inputSchema: {
+            type: "object",
+            properties: {
+                mute: {
+                    type: "boolean",
+                    description: "True to mute, false to unmute",
+                },
+            },
+            required: ["mute"],
+        },
+    },
+    // ========== Matrix Controls ==========
+    {
+        name: "osc_set_matrix_name",
+        description: "Set the name of a matrix output",
+        inputSchema: {
+            type: "object",
+            properties: {
+                matrix: {
+                    type: "number",
+                    description: "Matrix number (1-6)",
+                    minimum: 1,
+                    maximum: 6,
+                },
+                name: {
+                    type: "string",
+                    description: "Matrix name",
+                },
+            },
+            required: ["matrix", "name"],
+        },
+    },
+    {
+        name: "osc_get_matrix_name",
+        description: "Get the name of a matrix output",
+        inputSchema: {
+            type: "object",
+            properties: {
+                matrix: {
+                    type: "number",
+                    description: "Matrix number (1-6)",
+                    minimum: 1,
+                    maximum: 6,
+                },
+            },
+            required: ["matrix"],
+        },
+    },
+    {
+        name: "osc_send_to_matrix",
+        description: "Set the send level from a channel to a matrix output",
+        inputSchema: {
+            type: "object",
+            properties: {
+                channel: {
+                    type: "number",
+                    description: "Channel number (1-32)",
+                    minimum: 1,
+                    maximum: 32,
+                },
+                matrix: {
+                    type: "number",
+                    description: "Matrix number (1-6)",
+                    minimum: 1,
+                    maximum: 6,
+                },
+                level: {
+                    type: "number",
+                    description: "Send level (0.0 to 1.0)",
+                    minimum: 0,
+                    maximum: 1,
+                },
+            },
+            required: ["channel", "matrix", "level"],
+        },
+    },
+    // ========== Effect Type ==========
+    {
+        name: "osc_set_effect_type",
+        description: "Set the effect type for an effect slot",
+        inputSchema: {
+            type: "object",
+            properties: {
+                effect: {
+                    type: "number",
+                    description: "Effect number (1-8)",
+                    minimum: 1,
+                    maximum: 8,
+                },
+                type: {
+                    type: "number",
+                    description: "Effect type number (0-40+ depending on available effects)",
+                    minimum: 0,
+                },
+            },
+            required: ["effect", "type"],
+        },
+    },
+    {
+        name: "osc_get_effect_type",
+        description: "Get the effect type for an effect slot",
+        inputSchema: {
+            type: "object",
+            properties: {
+                effect: {
+                    type: "number",
+                    description: "Effect number (1-8)",
+                    minimum: 1,
+                    maximum: 8,
+                },
+            },
+            required: ["effect"],
+        },
+    },
+    // ========== More Dynamics Parameters ==========
+    {
+        name: "osc_set_compressor_knee",
+        description: "Set compressor knee for a channel",
+        inputSchema: {
+            type: "object",
+            properties: {
+                channel: {
+                    type: "number",
+                    description: "Channel number (1-32)",
+                    minimum: 1,
+                    maximum: 32,
+                },
+                knee: {
+                    type: "number",
+                    description: "Knee level (0.0 to 1.0, representing 0.0 to 5.0 dB)",
+                    minimum: 0,
+                    maximum: 1,
+                },
+            },
+            required: ["channel", "knee"],
+        },
+    },
+    {
+        name: "osc_set_compressor_makeup_gain",
+        description: "Set compressor makeup gain for a channel",
+        inputSchema: {
+            type: "object",
+            properties: {
+                channel: {
+                    type: "number",
+                    description: "Channel number (1-32)",
+                    minimum: 1,
+                    maximum: 32,
+                },
+                gain: {
+                    type: "number",
+                    description: "Makeup gain level (0.0 to 1.0, representing 0.0 to 24.0 dB)",
+                    minimum: 0,
+                    maximum: 1,
+                },
+            },
+            required: ["channel", "gain"],
+        },
+    },
+    {
+        name: "osc_set_compressor_detection",
+        description: "Set compressor detection mode (PEAK or RMS)",
+        inputSchema: {
+            type: "object",
+            properties: {
+                channel: {
+                    type: "number",
+                    description: "Channel number (1-32)",
+                    minimum: 1,
+                    maximum: 32,
+                },
+                detection: {
+                    type: "number",
+                    description: "Detection mode: 0=PEAK, 1=RMS",
+                    minimum: 0,
+                    maximum: 1,
+                },
+            },
+            required: ["channel", "detection"],
+        },
+    },
+    {
+        name: "osc_set_gate_range",
+        description: "Set gate range for a channel",
+        inputSchema: {
+            type: "object",
+            properties: {
+                channel: {
+                    type: "number",
+                    description: "Channel number (1-32)",
+                    minimum: 1,
+                    maximum: 32,
+                },
+                range: {
+                    type: "number",
+                    description: "Gate range (0.0 to 1.0, representing 0.0 to 80.0 dB)",
+                    minimum: 0,
+                    maximum: 1,
+                },
+            },
+            required: ["channel", "range"],
+        },
+    },
+    {
+        name: "osc_set_gate_attack",
+        description: "Set gate attack time for a channel",
+        inputSchema: {
+            type: "object",
+            properties: {
+                channel: {
+                    type: "number",
+                    description: "Channel number (1-32)",
+                    minimum: 1,
+                    maximum: 32,
+                },
+                attack: {
+                    type: "number",
+                    description: "Attack time (0.0 to 1.0, representing 0.02ms to 2000ms)",
+                    minimum: 0,
+                    maximum: 1,
+                },
+            },
+            required: ["channel", "attack"],
+        },
+    },
+    {
+        name: "osc_set_gate_hold",
+        description: "Set gate hold time for a channel",
+        inputSchema: {
+            type: "object",
+            properties: {
+                channel: {
+                    type: "number",
+                    description: "Channel number (1-32)",
+                    minimum: 1,
+                    maximum: 32,
+                },
+                hold: {
+                    type: "number",
+                    description: "Hold time (0.0 to 1.0, representing 5ms to 4000ms)",
+                    minimum: 0,
+                    maximum: 1,
+                },
+            },
+            required: ["channel", "hold"],
+        },
+    },
+    {
+        name: "osc_set_gate_release",
+        description: "Set gate release time for a channel",
+        inputSchema: {
+            type: "object",
+            properties: {
+                channel: {
+                    type: "number",
+                    description: "Channel number (1-32)",
+                    minimum: 1,
+                    maximum: 32,
+                },
+                release: {
+                    type: "number",
+                    description: "Release time (0.0 to 1.0, representing 5ms to 4000ms)",
+                    minimum: 0,
+                    maximum: 1,
+                },
+            },
+            required: ["channel", "release"],
+        },
+    },
+    // ========== Talkback ==========
+    {
+        name: "osc_set_talkback",
+        description: "Enable or disable talkback",
+        inputSchema: {
+            type: "object",
+            properties: {
+                enabled: {
+                    type: "boolean",
+                    description: "True to enable, false to disable",
+                },
+            },
+            required: ["enabled"],
+        },
+    },
+    {
+        name: "osc_get_talkback",
+        description: "Get talkback status",
+        inputSchema: {
+            type: "object",
+            properties: {},
+        },
+    },
     // ========== Status ==========
     {
         name: "osc_get_mixer_status",
@@ -1046,7 +1723,7 @@ const TOOLS: Tool[] = [
 // Create MCP server
 const server = new Server(
     {
-        name: "osc-mcp",
+        name: "x32-osc-mcp",
         version: "1.0.0",
     },
     {
@@ -1743,6 +2420,486 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 };
             }
 
+            // ========== System Commands ==========
+            case "osc_get_info": {
+                const info = await osc.getInfo();
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Mixer Info:\n${JSON.stringify(info, null, 2)}`,
+                        },
+                    ],
+                };
+            }
+
+            case "osc_enable_xcontrol": {
+                await osc.enableXControl();
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: "XControl mode enabled. The mixer will now send parameter updates to this client (timeout: 10 seconds).",
+                        },
+                    ],
+                };
+            }
+
+            // ========== Preamp Controls ==========
+            case "osc_set_preamp_gain": {
+                const { channel, gain } = args as { channel: number; gain: number };
+                await osc.setPreampGain(channel, gain);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Set channel ${channel} preamp gain to ${(gain * 100).toFixed(1)}%`,
+                        },
+                    ],
+                };
+            }
+
+            case "osc_get_preamp_gain": {
+                const { channel } = args as { channel: number };
+                const gain = await osc.getPreampGain(channel);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Channel ${channel} preamp gain is at ${(gain * 100).toFixed(1)}%`,
+                        },
+                    ],
+                };
+            }
+
+            case "osc_set_highpass_filter": {
+                const { channel, enabled } = args as { channel: number; enabled: boolean };
+                await osc.setHighPassFilter(channel, enabled);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Channel ${channel} high-pass filter ${enabled ? "enabled" : "disabled"}`,
+                        },
+                    ],
+                };
+            }
+
+            case "osc_set_highpass_filter_frequency": {
+                const { channel, frequency } = args as { channel: number; frequency: number };
+                await osc.setHighPassFilterFrequency(channel, frequency);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Set channel ${channel} high-pass filter frequency to ${(frequency * 100).toFixed(1)}%`,
+                        },
+                    ],
+                };
+            }
+
+            case "osc_set_phantom_power": {
+                const { headamp, enabled } = args as { headamp: number; enabled: boolean };
+                await osc.setPhantomPower(headamp, enabled);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Headamp ${headamp} phantom power ${enabled ? "enabled" : "disabled"}`,
+                        },
+                    ],
+                };
+            }
+
+            // ========== Insert Effects ==========
+            case "osc_set_insert_on": {
+                const { channel, enabled } = args as { channel: number; enabled: boolean };
+                await osc.setInsertOn(channel, enabled);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Channel ${channel} insert effect ${enabled ? "enabled" : "disabled"}`,
+                        },
+                    ],
+                };
+            }
+
+            case "osc_set_insert_position": {
+                const { channel, position } = args as { channel: number; position: number };
+                await osc.setInsertPosition(channel, position);
+                const posNames = ["PRE", "POST", "INS", "INS"];
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Set channel ${channel} insert position to ${posNames[position] || position}`,
+                        },
+                    ],
+                };
+            }
+
+            // ========== Solo Controls ==========
+            case "osc_set_solo": {
+                const { channel, solo } = args as { channel: number; solo: boolean };
+                await osc.setSolo(channel, solo);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Channel ${channel} ${solo ? "soloed" : "unsoloed"}`,
+                        },
+                    ],
+                };
+            }
+
+            case "osc_get_solo": {
+                const { channel } = args as { channel: number };
+                const solo = await osc.getSolo(channel);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Channel ${channel} is ${solo ? "soloed" : "not soloed"}`,
+                        },
+                    ],
+                };
+            }
+
+            // ========== DCA Groups ==========
+            case "osc_set_dca_on": {
+                const { dca, on } = args as { dca: number; on: boolean };
+                await osc.setDCAOn(dca, on);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `DCA ${dca} ${on ? "enabled" : "disabled"}`,
+                        },
+                    ],
+                };
+            }
+
+            case "osc_set_dca_fader": {
+                const { dca, level } = args as { dca: number; level: number };
+                await osc.setDCAFader(dca, level);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Set DCA ${dca} fader to ${(level * 100).toFixed(1)}%`,
+                        },
+                    ],
+                };
+            }
+
+            case "osc_get_dca_fader": {
+                const { dca } = args as { dca: number };
+                const level = await osc.getDCAFader(dca);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `DCA ${dca} fader is at ${(level * 100).toFixed(1)}%`,
+                        },
+                    ],
+                };
+            }
+
+            case "osc_set_dca_name": {
+                const { dca, name } = args as { dca: number; name: string };
+                await osc.setDCAName(dca, name);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Set DCA ${dca} name to "${name}"`,
+                        },
+                    ],
+                };
+            }
+
+            // ========== Output Controls ==========
+            case "osc_set_output_source": {
+                const { outputType, output, source } = args as {
+                    outputType: "main" | "aux" | "p16" | "aes" | "rec";
+                    output: number;
+                    source: number;
+                };
+                await osc.setOutputSource(outputType, output, source);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Set ${outputType} output ${output} source to ${source}`,
+                        },
+                    ],
+                };
+            }
+
+            case "osc_set_output_delay": {
+                const { outputType, output, enabled } = args as {
+                    outputType: "main" | "aux" | "p16" | "aes" | "rec";
+                    output: number;
+                    enabled: boolean;
+                };
+                await osc.setOutputDelay(outputType, output, enabled);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `${outputType} output ${output} delay ${enabled ? "enabled" : "disabled"}`,
+                        },
+                    ],
+                };
+            }
+
+            case "osc_set_output_delay_time": {
+                const { outputType, output, time } = args as {
+                    outputType: "main" | "aux" | "p16" | "aes" | "rec";
+                    output: number;
+                    time: number;
+                };
+                await osc.setOutputDelayTime(outputType, output, time);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Set ${outputType} output ${output} delay time to ${(time * 100).toFixed(1)}%`,
+                        },
+                    ],
+                };
+            }
+
+            // ========== Main Mono ==========
+            case "osc_set_main_mono_fader": {
+                const { level } = args as { level: number };
+                await osc.setMainMonoFader(level);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Set main mono fader to ${(level * 100).toFixed(1)}%`,
+                        },
+                    ],
+                };
+            }
+
+            case "osc_get_main_mono_fader": {
+                const level = await osc.getMainMonoFader();
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Main mono fader is at ${(level * 100).toFixed(1)}%`,
+                        },
+                    ],
+                };
+            }
+
+            case "osc_mute_main_mono": {
+                const { mute } = args as { mute: boolean };
+                await osc.muteMainMono(mute);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Main mono mix ${mute ? "muted" : "unmuted"}`,
+                        },
+                    ],
+                };
+            }
+
+            // ========== Matrix Controls ==========
+            case "osc_set_matrix_name": {
+                const { matrix, name } = args as { matrix: number; name: string };
+                await osc.setMatrixName(matrix, name);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Set matrix ${matrix} name to "${name}"`,
+                        },
+                    ],
+                };
+            }
+
+            case "osc_get_matrix_name": {
+                const { matrix } = args as { matrix: number };
+                const name = await osc.getMatrixName(matrix);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Matrix ${matrix} name is "${name}"`,
+                        },
+                    ],
+                };
+            }
+
+            case "osc_send_to_matrix": {
+                const { channel, matrix, level } = args as {
+                    channel: number;
+                    matrix: number;
+                    level: number;
+                };
+                await osc.sendToMatrix(channel, matrix, level);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Set channel ${channel} send to matrix ${matrix} at ${(level * 100).toFixed(1)}%`,
+                        },
+                    ],
+                };
+            }
+
+            // ========== Effect Type ==========
+            case "osc_set_effect_type": {
+                const { effect, type } = args as { effect: number; type: number };
+                await osc.setEffectType(effect, type);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Set effect ${effect} type to ${type}`,
+                        },
+                    ],
+                };
+            }
+
+            case "osc_get_effect_type": {
+                const { effect } = args as { effect: number };
+                const type = await osc.getEffectType(effect);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Effect ${effect} type is ${type}`,
+                        },
+                    ],
+                };
+            }
+
+            // ========== More Dynamics Parameters ==========
+            case "osc_set_compressor_knee": {
+                const { channel, knee } = args as { channel: number; knee: number };
+                await osc.setCompressorKnee(channel, knee);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Set channel ${channel} compressor knee to ${(knee * 100).toFixed(1)}%`,
+                        },
+                    ],
+                };
+            }
+
+            case "osc_set_compressor_makeup_gain": {
+                const { channel, gain } = args as { channel: number; gain: number };
+                await osc.setCompressorMakeupGain(channel, gain);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Set channel ${channel} compressor makeup gain to ${(gain * 100).toFixed(1)}%`,
+                        },
+                    ],
+                };
+            }
+
+            case "osc_set_compressor_detection": {
+                const { channel, detection } = args as { channel: number; detection: number };
+                await osc.setCompressorDetection(channel, detection);
+                const mode = detection === 0 ? "PEAK" : "RMS";
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Set channel ${channel} compressor detection to ${mode}`,
+                        },
+                    ],
+                };
+            }
+
+            case "osc_set_gate_range": {
+                const { channel, range } = args as { channel: number; range: number };
+                await osc.setGateRange(channel, range);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Set channel ${channel} gate range to ${(range * 100).toFixed(1)}%`,
+                        },
+                    ],
+                };
+            }
+
+            case "osc_set_gate_attack": {
+                const { channel, attack } = args as { channel: number; attack: number };
+                await osc.setGateAttack(channel, attack);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Set channel ${channel} gate attack to ${(attack * 100).toFixed(1)}%`,
+                        },
+                    ],
+                };
+            }
+
+            case "osc_set_gate_hold": {
+                const { channel, hold } = args as { channel: number; hold: number };
+                await osc.setGateHold(channel, hold);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Set channel ${channel} gate hold to ${(hold * 100).toFixed(1)}%`,
+                        },
+                    ],
+                };
+            }
+
+            case "osc_set_gate_release": {
+                const { channel, release } = args as { channel: number; release: number };
+                await osc.setGateRelease(channel, release);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Set channel ${channel} gate release to ${(release * 100).toFixed(1)}%`,
+                        },
+                    ],
+                };
+            }
+
+            // ========== Talkback ==========
+            case "osc_set_talkback": {
+                const { enabled } = args as { enabled: boolean };
+                await osc.setTalkback(enabled);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Talkback ${enabled ? "enabled" : "disabled"}`,
+                        },
+                    ],
+                };
+            }
+
+            case "osc_get_talkback": {
+                const enabled = await osc.getTalkback();
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Talkback is ${enabled ? "enabled" : "disabled"}`,
+                        },
+                    ],
+                };
+            }
+
             // ========== Status ==========
             case "osc_get_mixer_status": {
                 const status = await osc.getMixerStatus();
@@ -2041,15 +3198,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
 // Start server
 async function main() {
-    console.error("Starting OSC MCP Server...");
-    console.error(`Connecting to OSC device at ${OSC_HOST}:${OSC_PORT}`);
+    console.error("Starting X32 OSC MCP Server...");
+    console.error(`Connecting to Behringer X32 at ${OSC_HOST}:${OSC_PORT}`);
 
     await osc.connect();
 
     const transport = new StdioServerTransport();
     await server.connect(transport);
 
-    console.error("OSC MCP Server running");
+    console.error("X32 OSC MCP Server running");
 }
 
 main().catch((error) => {

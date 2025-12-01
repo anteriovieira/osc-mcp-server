@@ -1,9 +1,9 @@
 {
     "mcpServers": {
-        "osc": {
+        "x32-osc": {
             "command": "node",
             "args": [
-                "/path/to/osc-mcp/dist/index.js"
+                "/absolute/path/to/osc-mcp-server/dist/index.js"
             ],
             "env": {
                 "OSC_HOST": "192.168.1.70",

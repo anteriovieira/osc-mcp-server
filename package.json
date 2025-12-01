@@ -1,7 +1,7 @@
 {
     "name": "osc-mcp",
     "version": "1.0.0",
-    "description": "MCP server for controlling digital mixers (Behringer X32, Midas M32, etc.) via OSC",
+    "description": "MCP server for controlling the Behringer X32 digital mixer via OSC (Open Sound Control)",
     "type": "module",
     "main": "dist/index.js",
     "bin": {
@@ -16,13 +16,16 @@
     },
     "keywords": [
         "mcp",
+        "mcp-server",
         "osc",
+        "open-sound-control",
         "behringer",
         "x32",
-        "midas",
-        "m32",
+        "behringer-x32",
         "audio",
-        "mixer"
+        "mixer",
+        "digital-mixer",
+        "model-context-protocol"
     ],
     "author": "",
     "license": "MIT",

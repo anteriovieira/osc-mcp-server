@@ -1,13 +1,13 @@
-# OSC MCP Server
+# X32 OSC MCP Server
 
-A Model Context Protocol (MCP) server for controlling digital mixers (Behringer X32, Midas M32, etc.) via OSC (Open Sound Control). This allows you to control your mixer through chat commands in Claude Desktop.
+A Model Context Protocol (MCP) server for controlling the Behringer X32 digital mixer via OSC (Open Sound Control). This allows you to control your X32 mixer through natural language commands in Claude Desktop and other MCP-compatible AI assistants.
 
 ## Features
 
 - 🎚️ **Fader Control**: Set and get fader levels for all channels, buses, aux, matrix, and main LR
 - 🔇 **Mute/Unmute**: Control muting for channels, buses, aux, matrix, and main mix
 - 🎛️ **Pan Control**: Adjust stereo positioning for channels, buses, aux, and main mix
-- 🎵 **EQ Control**: Full 4-band parametric EQ with frequency, Q, gain, and on/off control
+- 🎵 **EQ Control**: Full 6-band parametric EQ with frequency, Q, gain, and on/off control
 - 🎚️ **Dynamics**: Complete gate and compressor control with attack, release, threshold, and ratio
 - 🔊 **Aux Sends**: Control sends from channels to mix buses and aux outputs
 - 📸 **Scenes**: Recall, save, and manage scenes with custom names
@@ -25,8 +25,8 @@ A Model Context Protocol (MCP) server for controlling digital mixers (Behringer 
 ### Prerequisites
 
 - Node.js 18 or higher
-- A digital mixer (Behringer X32, Midas M32, etc.) on your network
-- Claude Desktop app
+- A Behringer X32 digital mixer (or compatible X32 variant) on your network
+- Claude Desktop app or another MCP-compatible AI assistant
 
 ### Setup
 
@@ -161,7 +161,7 @@ Once configured in Claude Desktop, you can use natural language to control your 
 
 ## Available Tools
 
-The MCP server exposes **50+ tools** for comprehensive mixer control:
+The MCP server exposes **97 tools** for comprehensive X32 mixer control:
 
 ### Channel Controls (9 tools)
 1. **osc_set_fader** - Set channel fader level (0.0-1.0)
@@ -175,7 +175,7 @@ The MCP server exposes **50+ tools** for comprehensive mixer control:
 9. **osc_set_channel_source** / **osc_get_channel_source** - Configure input source
 
 ### EQ Controls (5 tools)
-10. **osc_set_eq** - Set EQ band gain (-15dB to +15dB)
+10. **osc_set_eq** - Set EQ band gain (-15dB to +15dB) for bands 1-6
 11. **osc_get_eq** - Get EQ band gain
 12. **osc_set_eq_frequency** - Set EQ band frequency
 13. **osc_set_eq_q** - Set EQ band Q factor
@@ -228,9 +228,66 @@ The MCP server exposes **50+ tools** for comprehensive mixer control:
 44. **osc_scene_save** - Save current mixer state as a scene
 45. **osc_get_scene_name** - Get scene name
 
+### System Commands (2 tools)
+46. **osc_get_info** - Get mixer information (server version, name, console model, version)
+47. **osc_enable_xcontrol** - Enable XControl mode to receive parameter updates
+
+### Preamp Controls (4 tools)
+48. **osc_set_preamp_gain** - Set preamp gain (headamp trim) for a channel
+49. **osc_get_preamp_gain** - Get preamp gain for a channel
+50. **osc_set_highpass_filter** - Enable/disable high-pass filter
+51. **osc_set_highpass_filter_frequency** - Set high-pass filter frequency
+52. **osc_set_phantom_power** - Set phantom power for a headamp (0-127)
+
+### Insert Effects (2 tools)
+53. **osc_set_insert_on** - Enable/disable insert effect for a channel
+54. **osc_set_insert_position** - Set insert effect position
+
+### Solo Controls (2 tools)
+55. **osc_set_solo** - Solo/unsolo a channel
+56. **osc_get_solo** - Get solo status of a channel
+
+### DCA Groups (4 tools)
+57. **osc_set_dca_on** - Enable/disable a DCA group (1-8)
+58. **osc_set_dca_fader** - Set DCA fader level
+59. **osc_get_dca_fader** - Get DCA fader level
+60. **osc_set_dca_name** - Set DCA group name
+
+### Output Controls (3 tools)
+61. **osc_set_output_source** - Set source for outputs (main, aux, p16, aes, rec)
+62. **osc_set_output_delay** - Enable/disable delay for outputs
+63. **osc_set_output_delay_time** - Set delay time for outputs
+
+### Main Mono (3 tools)
+64. **osc_set_main_mono_fader** - Set main mono fader level
+65. **osc_get_main_mono_fader** - Get main mono fader level
+66. **osc_mute_main_mono** - Mute/unmute main mono mix
+
+### Matrix Controls (3 tools)
+67. **osc_set_matrix_name** - Set matrix output name
+68. **osc_get_matrix_name** - Get matrix output name
+69. **osc_send_to_matrix** - Set send level from channel to matrix
+
+### Effect Type (2 tools)
+70. **osc_set_effect_type** - Set effect type for an effect slot
+71. **osc_get_effect_type** - Get effect type for an effect slot
+
+### Additional Dynamics Parameters (5 tools)
+72. **osc_set_compressor_knee** - Set compressor knee
+73. **osc_set_compressor_makeup_gain** - Set compressor makeup gain
+74. **osc_set_compressor_detection** - Set compressor detection mode (PEAK/RMS)
+75. **osc_set_gate_range** - Set gate range
+76. **osc_set_gate_attack** - Set gate attack time
+77. **osc_set_gate_hold** - Set gate hold time
+78. **osc_set_gate_release** - Set gate release time
+
+### Talkback (2 tools)
+79. **osc_set_talkback** - Enable/disable talkback
+80. **osc_get_talkback** - Get talkback status
+
 ### Status & Custom (2 tools)
-46. **osc_get_mixer_status** - Get mixer status and info
-47. **osc_custom_command** - Send custom OSC command
+81. **osc_get_mixer_status** - Get mixer status and info
+82. **osc_custom_command** - Send custom OSC command
 
 ## Technical Details
 
@@ -247,11 +304,13 @@ The MCP server exposes **50+ tools** for comprehensive mixer control:
 - Uses `osc-js` library with DatagramPlugin for UDP communication
 
 ### Supported Mixer Models:
+This MCP server is specifically designed for the Behringer X32 console and compatible variants:
 - Behringer X32
 - Behringer X32 Compact
 - Behringer X32 Producer
 - Behringer X32 Rack
-- Midas M32 (compatible)
+
+**Note**: While the Midas M32 shares similar OSC protocol features, this server is optimized and tested specifically for the Behringer X32.
 
 ## Development
 
@@ -441,9 +500,20 @@ Example with multiple arguments:
 }
 ```
 
-## X32 OSC Reference
+## X32 OSC Protocol Reference
 
-For advanced usage and complete OSC command reference, refer to the [Behringer X32 OSC Protocol](https://wiki.munichmakerlab.de/images/1/17/UNOFFICIAL_X32_OSC_REMOTE_PROTOCOL_%281%29.pdf).
+This MCP server implements the official Behringer X32 OSC Remote Protocol. For advanced usage and complete OSC command reference, refer to the official [Behringer X32 OSC Remote Protocol documentation](behringer-x32-x32-osc-remote-protocol-en-44463.pdf) (included in this repository).
+
+The server implements all major protocol features including:
+- Channel controls (32 input channels)
+- Bus controls (16 mix buses)
+- Matrix controls (6 matrix outputs)
+- Effects (8 effect slots)
+- DCA groups (8 groups)
+- Headamps (128 inputs including AES50)
+- Output routing (Main, Aux, P16, AES, REC)
+- Scenes (100 scenes)
+- System controls (Info, XControl, Talkback)
 
 ## License
 

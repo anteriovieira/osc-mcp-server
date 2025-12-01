@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "x32-agent",
+			"path": "../../Code/anteriovieira/x32-agent"
+		},
+		{
+			"name": "X32_macOS",
+			"path": "."
+		}
+	],
+	"settings": {}
+}

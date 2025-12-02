@@ -160,6 +160,21 @@ export class OSCClient {
         return await this.sendAndReceive(path);
     }
 
+    async getAllChannelNames(): Promise<{ channel: number; name: string }[]> {
+        // Fetch all 32 channel names in parallel
+        const promises = Array.from({ length: 32 }, (_, i) => {
+            const channel = i + 1;
+            return this.getChannelName(channel)
+                .then(name => ({ channel, name }))
+                .catch(error => ({
+                    channel,
+                    name: `Error: ${error instanceof Error ? error.message : String(error)}`
+                }));
+        });
+
+        return await Promise.all(promises);
+    }
+
     async setChannelColor(channel: number, color: number): Promise<void> {
         const path = `${this.getChannelPath(channel)}/config/color`;
         this.sendCommand(path, [color]);

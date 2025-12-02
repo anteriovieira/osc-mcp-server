@@ -179,6 +179,14 @@ const TOOLS: Tool[] = [
             required: ["channel"],
         },
     },
+    {
+        name: "osc_get_all_channel_names",
+        description: "Get the names of all 32 channels at once",
+        inputSchema: {
+            type: "object",
+            properties: {},
+        },
+    },
     // ========== EQ Controls ==========
     {
         name: "osc_set_eq",
@@ -1864,6 +1872,28 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                         {
                             type: "text",
                             text: `Channel ${channel} name is "${name}"`,
+                        },
+                    ],
+                };
+            }
+
+            case "osc_get_all_channel_names": {
+                const channels = await osc.getAllChannelNames();
+
+                // Format the output as a readable table
+                let output = "All Channel Names:\n\n";
+                output += "Channel | Name\n";
+                output += "--------|--------\n";
+
+                for (const { channel, name } of channels) {
+                    output += `${channel.toString().padStart(2, ' ')}      | ${name}\n`;
+                }
+
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: output,
                         },
                     ],
                 };

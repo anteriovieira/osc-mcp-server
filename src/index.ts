@@ -1413,6 +1413,22 @@ const TOOLS: Tool[] = [
         },
     },
     {
+        name: "osc_get_matrix_fader",
+        description: "Get the fader level for a matrix output",
+        inputSchema: {
+            type: "object",
+            properties: {
+                matrix: {
+                    type: "number",
+                    description: "Matrix number (1-6)",
+                    minimum: 1,
+                    maximum: 6,
+                },
+            },
+            required: ["matrix"],
+        },
+    },
+    {
         name: "osc_send_to_matrix",
         description: "Set the send level from a channel to a matrix output",
         inputSchema: {
@@ -2281,6 +2297,24 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 };
             }
 
+            case "osc_get_matrix_fader": {
+                const { matrix } = args as { matrix: number };
+                // We need to implement getMatrixFader in OSCClient first if it's missing
+                // But let's assume we will add it or it exists (we need to check osc-client.ts)
+                // Checking osc-client.ts... it WAS missing in the view.
+                // So we need to add it to OSCClient too.
+                // For now let's add the handler and we will fix OSCClient next.
+                const level = await osc.getMatrixFader(matrix);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Matrix ${matrix} fader is at ${(level * 100).toFixed(1)}%`,
+                        },
+                    ],
+                };
+            }
+
             case "osc_mute_matrix": {
                 const { matrix, mute } = args as {
                     matrix: number;
@@ -2409,7 +2443,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
             case "osc_get_scene_name": {
                 const { scene } = args as { scene: number };
-                
+
                 // Validate scene number before proceeding
                 if (scene < 1 || scene > 100) {
                     return {
@@ -3060,9 +3094,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                         content: [
                             {
                                 type: "text",
-                                text: `Failed to start X32 emulator: ${
-                                    error instanceof Error ? error.message : String(error)
-                                }. Make sure the emulator binary exists at emulator/X32 and is executable (chmod +x emulator/X32).`,
+                                text: `Failed to start X32 emulator: ${error instanceof Error ? error.message : String(error)
+                                    }. Make sure the emulator binary exists at emulator/X32 and is executable (chmod +x emulator/X32).`,
                             },
                         ],
                         isError: true,

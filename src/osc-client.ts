@@ -97,7 +97,7 @@ export class OSCClient {
     }
 
     private getAuxPath(aux: number): string {
-        return `/aux/${aux.toString().padStart(2, "0")}`;
+        return `/auxin/${aux.toString().padStart(2, "0")}`;
     }
 
     private getMatrixPath(matrix: number): string {
@@ -358,6 +358,11 @@ export class OSCClient {
         this.sendCommand(path, [level]);
     }
 
+    async getMatrixFader(matrix: number): Promise<number> {
+        const path = `/mtx/${matrix.toString().padStart(2, "0")}/mix/fader`;
+        return await this.sendAndReceive(path);
+    }
+
     async muteMatrix(matrix: number, mute: boolean): Promise<void> {
         const path = `/mtx/${matrix.toString().padStart(2, "0")}/mix/on`;
         this.sendCommand(path, [mute ? 0 : 1]);
@@ -366,17 +371,17 @@ export class OSCClient {
     // ========== Effects ==========
 
     async setEffectOn(effect: number, on: boolean): Promise<void> {
-        const path = `/fx/${effect.toString().padStart(2, "0")}/on`;
+        const path = `/fx/${effect}/on`;
         this.sendCommand(path, [on ? 1 : 0]);
     }
 
     async setEffectMix(effect: number, mix: number): Promise<void> {
-        const path = `/fx/${effect.toString().padStart(2, "0")}/mix`;
+        const path = `/fx/${effect}/mix`;
         this.sendCommand(path, [mix]);
     }
 
     async setEffectParam(effect: number, param: number, value: number): Promise<void> {
-        const path = `/fx/${effect.toString().padStart(2, "0")}/par/${param.toString().padStart(2, "0")}`;
+        const path = `/fx/${effect}/par/${param.toString().padStart(2, "0")}`;
         this.sendCommand(path, [value]);
     }
 
@@ -417,7 +422,7 @@ export class OSCClient {
         // X32 uses 0-indexed scene numbers internally with 3-digit zero padding
         const sceneIndex = scene - 1;
         const path = `/-snap/${sceneIndex.toString().padStart(3, "0")}/name`;
-        
+
         try {
             return await this.sendAndReceive(path, undefined, 3000);
         } catch (error) {
@@ -593,12 +598,12 @@ export class OSCClient {
     // ========== Effect Type ==========
 
     async setEffectType(effect: number, type: number): Promise<void> {
-        const path = `/fx/${effect.toString().padStart(2, "0")}/type`;
+        const path = `/fx/${effect}/type`;
         this.sendCommand(path, [type]);
     }
 
     async getEffectType(effect: number): Promise<number> {
-        const path = `/fx/${effect.toString().padStart(2, "0")}/type`;
+        const path = `/fx/${effect}/type`;
         return await this.sendAndReceive(path);
     }
 

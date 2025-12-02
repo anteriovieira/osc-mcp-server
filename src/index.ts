@@ -2409,15 +2409,42 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
             case "osc_get_scene_name": {
                 const { scene } = args as { scene: number };
-                const name = await osc.getSceneName(scene);
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: `Scene ${scene} name is "${name}"`,
-                        },
-                    ],
-                };
+                
+                // Validate scene number before proceeding
+                if (scene < 1 || scene > 100) {
+                    return {
+                        content: [
+                            {
+                                type: "text",
+                                text: `Invalid scene number: ${scene}. Scene numbers must be between 1 and 100.`,
+                            },
+                        ],
+                        isError: true,
+                    };
+                }
+
+                try {
+                    const name = await osc.getSceneName(scene);
+                    return {
+                        content: [
+                            {
+                                type: "text",
+                                text: `Scene ${scene} name is "${name}"`,
+                            },
+                        ],
+                    };
+                } catch (error) {
+                    const errorMessage = error instanceof Error ? error.message : String(error);
+                    return {
+                        content: [
+                            {
+                                type: "text",
+                                text: `Could not retrieve scene ${scene} name.\n\n${errorMessage}\n\nNote: The X32 typically requires XControl to be enabled before it will respond to scene name queries. Try enabling XControl first (osc_enable_xcontrol) and then query again.`,
+                            },
+                        ],
+                        isError: true,
+                    };
+                }
             }
 
             // ========== System Commands ==========

@@ -73,18 +73,18 @@ export class OSCClient {
         this.osc.send(message);
     }
 
-    private async sendAndReceive(address: string, args?: any[]): Promise<any> {
+    private async sendAndReceive(address: string, args?: any[], timeout: number = 2000): Promise<any> {
         return new Promise((resolve, reject) => {
             this.responseCallbacks.set(address, resolve);
             this.sendCommand(address, args);
 
-            // Timeout after 1 second
+            // Timeout after specified duration (default 2 seconds for queries)
             setTimeout(() => {
                 if (this.responseCallbacks.has(address)) {
                     this.responseCallbacks.delete(address);
                     reject(new Error(`Timeout waiting for response from ${address}`));
                 }
-            }, 1000);
+            }, timeout);
         });
     }
 
@@ -409,8 +409,26 @@ export class OSCClient {
     }
 
     async getSceneName(scene: number): Promise<string> {
-        const path = `/-snap/${(scene - 1).toString().padStart(3, "0")}/name`;
-        return await this.sendAndReceive(path);
+        // Validate scene number (X32 scenes are 1-100, user-facing)
+        if (scene < 1 || scene > 100) {
+            throw new Error(`Scene number must be between 1 and 100, got ${scene}`);
+        }
+
+        // X32 uses 0-indexed scene numbers internally with 3-digit zero padding
+        const sceneIndex = scene - 1;
+        const path = `/-snap/${sceneIndex.toString().padStart(3, "0")}/name`;
+        
+        try {
+            return await this.sendAndReceive(path, undefined, 3000);
+        } catch (error) {
+            // X32 may not respond if XControl is not active or scene doesn't exist
+            if (error instanceof Error && error.message.includes("Timeout")) {
+                throw new Error(
+                    `Timeout waiting for scene ${scene} name. Note: The X32 typically only responds to scene name queries when XControl is active. Try: 1) Enable XControl first (osc_enable_xcontrol), 2) Verify scene ${scene} exists and has been saved, 3) Query again after XControl is active.`
+                );
+            }
+            throw error;
+        }
     }
 
     // ========== Meters ==========

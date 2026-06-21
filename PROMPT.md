@@ -53,7 +53,30 @@ The user has access to an OSC MCP (Model Context Protocol) server that provides 
 ### Custom Commands
 - Send any OSC command to the mixer for advanced control
 
+### Reading Mixer State (prefer these for inspection)
+- **`osc_get_mixer_overview`** — Full snapshot: scene, main, channels, buses (one call)
+- **`osc_get_channel_detail`** — Deep read of one channel (EQ, dynamics, sends)
+- **`osc_get_meters`** — Live levels in dB; `mode: "cache"` for quick checks, `"snapshot"` for fresh readings
+- **`osc_get_mixer_status`** — Connection, current scene, main fader
+
+### Composite Workflows (prefer for common tasks)
+- **`osc_apply_channel_preset`** — Apply vocal/bass/acoustic-guitar/electric-guitar-forro/percussion preset in one call (HPF + EQ + comp + optional FX). Use `dryRun: true` to preview.
+- **`osc_mute_all_except`** — Solo workflow: mute all channels except listed ones (by number or name from overview).
+- **`osc_soundcheck_channel`** — Full read of one channel including meters (instead of chaining get tools).
+- **`osc_setup_monitor_mix`** — Configure a monitor bus with name, fader, and channel sends.
+
+Channel names are resolved case-insensitively from the mixer (read overview first if unsure of spelling).
+
+Response fields:
+- `faderDb` — fader position in dB (0.75 = 0 dB)
+- `hotChannels` — channels above -6 dB (meters)
+- `silentChannels` — channels below -60 dB (meters)
+
 ## How to Help Users
+
+0. **See Before You Change**: Before bulk edits or soundcheck, call `osc_get_mixer_overview`. For signal questions, use `osc_get_meters`. For one channel, prefer `osc_soundcheck_channel` (or `osc_get_channel_detail`).
+
+0b. **Use Composite Tools When They Fit**: For "apply vocal preset", "solo vocals", or "mute everything except X", use the composite tools instead of chaining 8+ atomic calls. Use `dryRun: true` on write composites to preview the `changes` array first.
 
 1. **Interpret Natural Language**: When users say things like "set channel 1 to 75%", translate this to:
    - Tool: `osc_set_fader`
@@ -108,9 +131,13 @@ The user has access to an OSC MCP (Model Context Protocol) server that provides 
 *[Execute osc_set_bus_fader, osc_set_bus_name]*
 
 **User**: "What's the current level of channel 3?"
-**You**: "Let me check the current fader level of channel 3."
-*[Execute osc_get_fader with channel: 3]*
-*[Report the result, e.g., "Channel 3 is currently at 65% (0.65), which is approximately -3dB"]*
+**You**: "Let me check channel 3."
+*[Execute osc_get_channel_detail with channel: 3, or osc_get_meters for live signal level]*
+*[Report fader position and input meter level in dB]*
+
+**User**: "Give me an overview before we start"
+**You**: "I'll read the full mixer state first."
+*[Execute osc_get_mixer_overview]*
 
 ## Important Notes
 

@@ -931,10 +931,201 @@ const TOOLS: Tool[] = [
             required: ["scene"],
         },
     },
+    // ========== Mixer read / overview ==========
+    {
+        name: "osc_get_mixer_overview",
+        description:
+            "Get a compact snapshot of mixer state: scene, main, channels, and buses in one call. Prefer this before making bulk changes.",
+        inputSchema: {
+            type: "object",
+            properties: {
+                includeChannels: {
+                    description:
+                        "Include channels: true (all 16), false, or array of channel numbers 1-16",
+                },
+                includeBuses: {
+                    description:
+                        "Include buses: true (all 6), false, or array of bus numbers 1-6",
+                },
+                includeSends: {
+                    type: "boolean",
+                    description: "Include channel-to-bus send matrix (default false)",
+                },
+                includeDynamics: {
+                    type: "boolean",
+                    description:
+                        "Include EQ/gate/compressor summary per channel (default false)",
+                },
+            },
+        },
+    },
+    {
+        name: "osc_get_channel_detail",
+        description:
+            "Deep read of one channel: fader, HPF, EQ, dynamics, bus/FX sends. Use for soundcheck or troubleshooting.",
+        inputSchema: {
+            type: "object",
+            properties: {
+                channel: {
+                    type: "number",
+                    description: "Channel number (1-16)",
+                    minimum: 1,
+                    maximum: 16,
+                },
+            },
+            required: ["channel"],
+        },
+    },
+    {
+        name: "osc_get_meters",
+        description:
+            "Get live signal levels in dB. mode=cache (instant, default) or snapshot (fresh reading). Returns input and mix meters plus hot/silent channel lists.",
+        inputSchema: {
+            type: "object",
+            properties: {
+                mode: {
+                    type: "string",
+                    enum: ["cache", "snapshot"],
+                    description: "cache = latest background reading; snapshot = wait for fresh update",
+                },
+                groups: {
+                    type: "array",
+                    items: { type: "string", enum: ["input", "mix"] },
+                    description: 'Meter groups: "input" (/meters/2), "mix" (/meters/1). Default both.',
+                },
+            },
+        },
+    },
+    // ========== Composite Workflows ==========
+    {
+        name: "osc_apply_channel_preset",
+        description:
+            "Apply a named preset (HPF, EQ, compressor, optional FX send) to one channel in a single call. Presets: vocal, bass, acoustic-guitar, electric-guitar-forro, percussion.",
+        inputSchema: {
+            type: "object",
+            properties: {
+                channel: {
+                    oneOf: [
+                        { type: "number", minimum: 1, maximum: 16 },
+                        { type: "string" },
+                    ],
+                    description:
+                        "Channel number (1-16) or name (case-insensitive match from mixer)",
+                },
+                preset: {
+                    type: "string",
+                    enum: [
+                        "vocal",
+                        "bass",
+                        "acoustic-guitar",
+                        "electric-guitar-forro",
+                        "percussion",
+                    ],
+                    description: "Named channel preset to apply",
+                },
+                dryRun: {
+                    type: "boolean",
+                    description:
+                        "If true, return planned changes without applying to the mixer",
+                },
+            },
+            required: ["channel", "preset"],
+        },
+    },
+    {
+        name: "osc_mute_all_except",
+        description:
+            "Mute all channels except the listed ones (by number or name). Use for solo workflows.",
+        inputSchema: {
+            type: "object",
+            properties: {
+                channels: {
+                    type: "array",
+                    items: {
+                        oneOf: [
+                            { type: "number", minimum: 1, maximum: 16 },
+                            { type: "string" },
+                        ],
+                    },
+                    description:
+                        "Channels to keep unmuted (numbers or names, e.g. [5, \"Guitar\"])",
+                },
+                includeMain: {
+                    type: "boolean",
+                    description:
+                        "If true, also ensure main LR is unmuted (default: leave main untouched)",
+                },
+                dryRun: {
+                    type: "boolean",
+                    description:
+                        "If true, return planned changes without applying to the mixer",
+                },
+            },
+            required: ["channels"],
+        },
+    },
+    {
+        name: "osc_soundcheck_channel",
+        description:
+            "Read one channel end-to-end: fader, mute, pan, HPF, EQ, dynamics, sends, and input/mix meter levels in one JSON report.",
+        inputSchema: {
+            type: "object",
+            properties: {
+                channel: {
+                    oneOf: [
+                        { type: "number", minimum: 1, maximum: 16 },
+                        { type: "string" },
+                    ],
+                    description:
+                        "Channel number (1-16) or name (case-insensitive match from mixer)",
+                },
+            },
+            required: ["channel"],
+        },
+    },
+    {
+        name: "osc_setup_monitor_mix",
+        description:
+            "Configure a bus as a monitor mix: set bus name, bus fader, and send levels from listed channels.",
+        inputSchema: {
+            type: "object",
+            properties: {
+                bus: {
+                    type: "number",
+                    minimum: 1,
+                    maximum: 6,
+                    description: "Bus number (1-6)",
+                },
+                name: {
+                    type: "string",
+                    description: "Name for the monitor bus",
+                },
+                channels: {
+                    type: "array",
+                    description:
+                        "Channels to send to the bus (number, name, or object with channel + optional level/levelDb)",
+                    items: {},
+                },
+                busFader: {
+                    type: "number",
+                    minimum: 0,
+                    maximum: 1,
+                    description: "Bus fader level (default 0.75 = 0 dB)",
+                },
+                dryRun: {
+                    type: "boolean",
+                    description:
+                        "If true, return planned changes without applying to the mixer",
+                },
+            },
+            required: ["bus", "name", "channels"],
+        },
+    },
     // ========== Status ==========
     {
         name: "osc_get_mixer_status",
-        description: "Get overall mixer status and information",
+        description:
+            "Get mixer connection info, current scene, and main fader/mute state",
         inputSchema: {
             type: "object",
             properties: {},
@@ -1001,11 +1192,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             case "osc_get_fader": {
                 const { channel } = args as { channel: number };
                 const level = await osc.getFader(channel);
+                const db = OSCClient.levelToDb(level);
                 return {
                     content: [
                         {
                             type: "text",
-                            text: `Channel ${channel} fader is at ${(level * 100).toFixed(1)}%`,
+                            text: `Channel ${channel} fader is at ${(level * 100).toFixed(1)}% (${db} dB)`,
                         },
                     ],
                 };
@@ -1335,11 +1527,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             case "osc_get_bus_fader": {
                 const { bus } = args as { bus: number };
                 const level = await osc.getBusFader(bus);
+                const db = OSCClient.levelToDb(level);
                 return {
                     content: [
                         {
                             type: "text",
-                            text: `Bus ${bus} fader is at ${(level * 100).toFixed(1)}%`,
+                            text: `Bus ${bus} fader is at ${(level * 100).toFixed(1)}% (${db} dB)`,
                         },
                     ],
                 };
@@ -1478,11 +1671,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
             case "osc_get_main_fader": {
                 const level = await osc.getMainFader();
+                const db = OSCClient.levelToDb(level);
                 return {
                     content: [
                         {
                             type: "text",
-                            text: `Main LR fader is at ${(level * 100).toFixed(1)}%`,
+                            text: `Main LR fader is at ${(level * 100).toFixed(1)}% (${db} dB)`,
                         },
                     ],
                 };
@@ -1634,6 +1828,147 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                         {
                             type: "text",
                             text: `Scene ${scene} name is "${name}"`,
+                        },
+                    ],
+                };
+            }
+
+            // ========== Mixer read / overview ==========
+            case "osc_get_mixer_overview": {
+                const {
+                    includeChannels,
+                    includeBuses,
+                    includeSends,
+                    includeDynamics,
+                } = args as {
+                    includeChannels?: boolean | number[] | "all";
+                    includeBuses?: boolean | number[] | "all";
+                    includeSends?: boolean;
+                    includeDynamics?: boolean;
+                };
+                const overview = await osc.getMixerOverview({
+                    includeChannels,
+                    includeBuses,
+                    includeSends,
+                    includeDynamics,
+                });
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: JSON.stringify(overview, null, 2),
+                        },
+                    ],
+                };
+            }
+
+            case "osc_get_channel_detail": {
+                const { channel } = args as { channel: number };
+                const detail = await osc.getChannelDetail(channel);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: JSON.stringify(detail, null, 2),
+                        },
+                    ],
+                };
+            }
+
+            case "osc_get_meters": {
+                const { mode, groups } = args as {
+                    mode?: "cache" | "snapshot";
+                    groups?: ("input" | "mix")[];
+                };
+                const meters = await osc.getMeters({ mode, groups });
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: JSON.stringify(meters, null, 2),
+                        },
+                    ],
+                };
+            }
+
+            // ========== Composite Workflows ==========
+            case "osc_apply_channel_preset": {
+                const { channel, preset, dryRun } = args as {
+                    channel: number | string;
+                    preset: string;
+                    dryRun?: boolean;
+                };
+                const result = await osc.applyChannelPreset(channel, preset, {
+                    dryRun,
+                });
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: JSON.stringify(result, null, 2),
+                        },
+                    ],
+                };
+            }
+
+            case "osc_mute_all_except": {
+                const { channels, includeMain, dryRun } = args as {
+                    channels: (number | string)[];
+                    includeMain?: boolean;
+                    dryRun?: boolean;
+                };
+                const result = await osc.muteAllExcept(channels, {
+                    includeMain,
+                    dryRun,
+                });
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: JSON.stringify(result, null, 2),
+                        },
+                    ],
+                };
+            }
+
+            case "osc_soundcheck_channel": {
+                const { channel } = args as { channel: number | string };
+                const result = await osc.soundcheckChannel(channel);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: JSON.stringify(result, null, 2),
+                        },
+                    ],
+                };
+            }
+
+            case "osc_setup_monitor_mix": {
+                const { bus, name, channels, busFader, dryRun } = args as {
+                    bus: number;
+                    name: string;
+                    channels: Array<
+                        | number
+                        | string
+                        | {
+                              channel: number | string;
+                              level?: number;
+                              levelDb?: number;
+                          }
+                    >;
+                    busFader?: number;
+                    dryRun?: boolean;
+                };
+                const result = await osc.setupMonitorMix(bus, name, channels, {
+                    busFader,
+                    dryRun,
+                });
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: JSON.stringify(result, null, 2),
                         },
                     ],
                 };

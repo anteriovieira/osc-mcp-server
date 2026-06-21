@@ -17,7 +17,7 @@ A Model Context Protocol (MCP) server for controlling **X-Air family** digital m
 - 🔌 **Routing**: Configure channel input sources (0-15)
 - 📝 **Naming**: Set and get names for channels and buses
 - 🔧 **Custom Commands**: Send any OSC command to the mixer
-- 📊 **Status Monitoring**: Get mixer status and information
+- 📊 **Status Monitoring**: Get mixer status, overview snapshots, and live meters
 
 ## Installation
 
@@ -98,6 +98,13 @@ Add the following to your Claude Desktop configuration file:
 
 Once configured in Claude Desktop, you can use natural language to control your mixer:
 
+### Reading Mixer State
+- "Give me an overview of the mixer"
+- "What's on channel 1 — full detail for soundcheck"
+- "Which channels are hot right now?"
+- "Check input levels before we start"
+- "Is anything clipping on the vocal channel?"
+
 ### Basic Fader Control
 - "Set channel 1 fader to 75%"
 - "What's the current level of channel 5?"
@@ -168,7 +175,28 @@ Once configured in Claude Desktop, you can use natural language to control your 
 
 ## Available Tools
 
-The MCP server exposes **46 tools** for X-Air mixer control. Limits: channels 1-16, buses 1-6, effects 1-4, FX sends (buses 7-10), scenes 1-64.
+The MCP server exposes **53 tools** for X-Air mixer control. Limits: channels 1-16, buses 1-6, effects 1-4, FX sends (buses 7-10), scenes 1-64.
+
+### Reading Mixer State (3 tools)
+
+Prefer these before making bulk changes or when diagnosing signal issues:
+
+- **osc_get_mixer_overview** — Scene, main, all channels, and buses in one JSON snapshot. Optional `includeSends` and `includeDynamics`.
+- **osc_get_channel_detail** — Deep read of one channel: HPF, EQ, dynamics, bus/FX sends (with dB).
+- **osc_get_meters** — Live signal levels in dB. `mode: "cache"` (instant) or `"snapshot"` (fresh). Returns `input` (/meters/2), `mix` (/meters/1), plus `hotChannels` (> -6 dB) and `silentChannels` (< -60 dB).
+
+Fader get tools (`osc_get_fader`, `osc_get_bus_fader`, `osc_get_main_fader`) now include dB in the response.
+
+### Composite Workflows (4 tools)
+
+Higher-level tools that run vetted multi-step jobs in one call. All write composites return a `changes` array for transparency and support `dryRun: true` to preview without applying.
+
+- **osc_apply_channel_preset** — Apply preset `vocal`, `bass`, `acoustic-guitar`, `electric-guitar-forro`, or `percussion` to a channel (by number or name). Sets HPF, EQ, compressor, and optional FX send.
+- **osc_mute_all_except** — Mute all channels except a list (e.g. solo vocals: `channels: ["Vocals"]`). Optional `includeMain: true` ensures main LR stays unmuted.
+- **osc_soundcheck_channel** — One JSON report for a channel: fader, HPF, EQ, dynamics, sends, and input/mix meters.
+- **osc_setup_monitor_mix** — Name a bus, set bus fader, and configure sends from listed channels.
+
+Example: "apply vocal preset to channel 5" → `osc_apply_channel_preset({ channel: 5, preset: "vocal" })`. "Mute everything except Vocals and Guitar" → `osc_mute_all_except({ channels: ["Vocals", "Guitar"] })`.
 
 ### Channel Controls (13 tools)
 - **osc_set_fader** / **osc_get_fader** - Channel fader level (0.0-1.0, 0.75=0dB)
@@ -206,8 +234,26 @@ The MCP server exposes **46 tools** for X-Air mixer control. Limits: channels 1-
 - **osc_scene_recall** / **osc_scene_save** / **osc_get_scene_name** - Snapshots 1-64
 
 ### Status & Custom (2 tools)
-- **osc_get_mixer_status** - Mixer status and info
+- **osc_get_mixer_status** — Connection info, current scene, main fader/mute
 - **osc_custom_command** - Send custom OSC command
+
+## Reading Mixer State
+
+The server subscribes to X-Air meter streams (`/meters/1` and `/meters/2`) in the background and renews every 8 seconds. Use:
+
+| Tool | When to use |
+|------|-------------|
+| `osc_get_mixer_overview` | Before show, after scene recall, or any "what's the mix look like?" question |
+| `osc_get_channel_detail` | Soundcheck or troubleshooting one channel |
+| `osc_get_meters` | "Is channel 3 getting signal?" / "What's loud?" — use `snapshot` before/after gain changes |
+
+Meter values are in dB (X-Air resolution: 1/256 dB). Overview responses include `faderDb` fields using the X-Air fader scale (0.75 = 0 dB).
+
+Run unit tests for meter parsing (no hardware required):
+
+```bash
+npm run test:unit
+```
 
 ## Technical Details
 

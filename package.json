@@ -12,7 +12,8 @@
     "dev": "tsc --watch",
     "start": "node dist/index.js",
     "prepare": "npm run build",
-    "test": "node test-connection.js"
+    "test": "node test-connection.js",
+    "test:unit": "npm run build && node --test dist/**/*.test.js"
   },
   "keywords": [
     "mcp",
